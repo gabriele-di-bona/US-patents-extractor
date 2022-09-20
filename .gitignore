@@ -6,3 +6,4 @@ data/
 *__pycache__/
 maven/
 bulk_data/
+extracted_data/
