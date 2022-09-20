@@ -59,8 +59,8 @@ shell_parser = argparse.ArgumentParser(description='Extract all patents from the
 # quiet argument, to supress info
 shell_parser.add_argument(
     "-i", "--index_archive", type=int,
-    default=-1,
-    help="Index of the archive list to choose the archive to be processed."
+    default=1,
+    help="Index of the archive list to choose the archive to be processed. Must be a number greater or equal than 1. [default: 1]"
     )
 
 # Parse shell arguments
@@ -76,31 +76,43 @@ os.makedirs(extracted_data_folder, exist_ok = True)
 
 
 # NB: archives are all .zip
-archives_paths = [path for path in os.listdir(bulk_data_folder) if path[-4:] == ".zip"]
-path = archives_paths[index_archive]
-print('Requested path n. %d out of %d, that is\n\t%s'%(index_archive,len(archives_paths), path), flush=True)
+archive_paths = sorted([path for path in os.listdir(bulk_data_folder) if path[-4:] == ".zip"])
+path = archive_paths[index_archive - 1] # So that the argument index_archive from shell go from 1 to len(archives)
+print('Requested path n. %d out of %d, that is\n\t%s'%(index_archive,len(archive_paths), os.path.join(bulk_data_folder,path)), flush=True)
 
-name_archive = path[:-4] # cutting the '.zip' string
-archive = zipfile.ZipFile(os.path.join(bulk_data_folder,f'{name_archive}.zip'), 'r')
-if len(archive.namelist()) > 1:
-    print('There are more than 1 element inside the archive, which one should I choose? Here they are.', flush=True)
-    print(archive.namelist(), flush=True)
-    with open(os.path.join(extracted_data_folder, f'{name_archive}_ERROR.txt'), 'w') as fp:
-        fp.writelines(archive.namelist())
-    print(f'Exiting at {datetime.now()}...', flush=True)
-    exit()
+try:
+    name_archive = path[:-4] # cutting the '.zip' string
+    archive = zipfile.ZipFile(os.path.join(bulk_data_folder,f'{name_archive}.zip'), 'r')
+    if len(archive.namelist()) > 1:
+        print('There are more than 1 element inside the archive, which one should I choose? Here they are.', flush=True)
+        print(archive.namelist(), flush=True)
+        with open(os.path.join(extracted_data_folder, f'ERROR_{name_archive}_more_than_1_element.txt'), 'w') as fp:
+            fp.writelines(archive.namelist())
+        print(f'Exiting at {datetime.now()}...', flush=True)
+        exit()
 
-for unzipped_file_path in archive.namelist():
-    print('Opening',unzipped_file_path)
-    file_name = unzipped_file_path.split('/')[-1]
-    file_object = archive.open(f'{unzipped_file_path}', mode='r')
-    patents = import_file(file_path=unzipped_file_path,file_object=file_object, year=None,use_as_name_archive = False)
+    for unzipped_file_path in archive.namelist():
+        print('Opening',unzipped_file_path)
+        file_name = unzipped_file_path.split('/')[-1]
+        file_object = archive.open(f'{unzipped_file_path}', mode='r')
+        patents = import_file(
+            file_path=unzipped_file_path,
+            file_object=file_object, 
+            year=None,
+            use_as_name_archive = False,
+            bulk_data_folder = bulk_data_folder
+        )
 
-print(f"FOUND {len(patents)} PATENTS.", flush=True)
+    print(f"FOUND {len(patents)} PATENTS.", flush=True)
 
-with gzip.open(os.path.join(extracted_data_folder, f'{name_archive}.pkl.gz'), 'wb') as fp:
-    joblib.dump(patents, fp)
+    with gzip.open(os.path.join(extracted_data_folder, f'{name_archive}.pkl.gz'), 'wb') as fp:
+        joblib.dump(patents, fp)
 
-print('All dumped', flush=True)
-print(f'Script time: {datetime.now() - start_time}', flush=True)
-print(f'Exiting script at {datetime.now()}', flush=True)
+    print('All dumped', flush=True)
+    print(f'Script time: {datetime.now() - start_time}', flush=True)
+    print(f'Exiting script at {datetime.now()}', flush=True)
+    
+except:
+    print(f"FOUND ERROR", flush = True)
+    with open(os.path.join(extracted_data_folder, f'ERROR_{name_archive}_generic.txt'), 'w') as fp:
+        fp.writelines([path])
