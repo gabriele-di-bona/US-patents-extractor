@@ -1,0 +1,6 @@
+PatentPublicData/
+*.sh.o*
+*.ipynb_checkpoints/
+*outputs/
+data/
+*__pycache__/
