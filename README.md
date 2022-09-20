@@ -21,4 +21,12 @@ To download the data, run the script `~/bash_scripts/corpus_builder.sh` from the
 The script can be interrupted, and it will automatically continue from where it has left.
 To change the parameters of the corpus download (e.g. the initial or final date), change the parameters inside the script.
 
-## Parse Corpus
+## Extract and Parse Corpus
+To process and extract the data, run the script `~/bash_scripts/extract.sh` from the folder `~/bash_scripts/outputs/`. This will process the first archive (only 1 week). In order to process the other archives, run the script changing the index. The processed data is saved into the folder `~/extracted_data/` as a list of dicts saved as `.pkl.gz` files, one dict for each patent.
+The keys of each patent could be empty strings if not found. if there is any mistake during the process, a respective error `.txt` file is created.
+
+In order to see how many archives there are, either check the output of the extraction script, or run the following inside the directory `~/bulk_data/`.
+
+```
+ls -l | wc -l
+```
