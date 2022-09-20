@@ -18,7 +18,7 @@ If everything has run smoothly so far, you are ready to download the data.
 
 ### Bash script to download corpus
 To download the data, run the script `~/bash_scripts/corpus_builder.sh` from the folder `~/bash_scripts/outputs/`. This will download all the weekly bulk data into the folder `~/bulk_data/`.
-The script can be interrupted, and it will automatically continue from where it has left.
+The script technically can be interrupted, and it will automatically continue from where it has left. However, there are some bugs and it could fail to download some of the files. We recommend to delete or move all the files already downloaded within the specified dates.
 To change the parameters of the corpus download (e.g. the initial or final date), change the parameters inside the script.
 
 ## Extract and Parse Corpus
@@ -28,5 +28,5 @@ The keys of each patent could be empty strings if not found. if there is any mis
 In order to see how many archives there are, either check the output of the extraction script, or run the following inside the directory `~/bulk_data/`.
 
 ```
-ls -l | wc -l
+ls | wc -l
 ```
