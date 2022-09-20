@@ -123,6 +123,14 @@ def dat_projection(patent):
             abstract = patent[k]
             text = ""
             additional = {}
+            if type(abstract) == list:
+                # In this case there is a mistake, and there are two abstracts.
+                # This error has appeared only in 3 patents within pftaps19871103_wk44 and pftaps19871110_wk45.
+                # In all three cases, the real abstract was the first one.
+                try:
+                    abstract = abstract[0]
+                except:
+                    continue
             for kk in abstract.keys():
                 if kk=='EQU' or kk=='TBL' :
                     additional[kk] = abstract[kk]
