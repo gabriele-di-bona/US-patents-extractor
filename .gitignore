@@ -4,3 +4,5 @@ PatentPublicData/
 *outputs/
 data/
 *__pycache__/
+maven/
+bulk_data/
