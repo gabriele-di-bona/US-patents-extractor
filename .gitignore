@@ -8,3 +8,4 @@ maven/
 bulk_data/
 extracted_data/
 *.zip
+errors_parsing/
