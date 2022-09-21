@@ -9,7 +9,7 @@ def xml_45_projection(patent):
     res = {}
     res['uid'] =  text_leaves(xpath(patent ,['us-bibliographic-data-grant','publication-reference','document-id','doc-number'])).lstrip('0')
     res['grant_date'] = text_leaves(xpath(patent ,['us-bibliographic-data-grant','publication-reference','document-id','date']))
-    res['kind'] = text_leaves(xpath(patent ,['us-bibliographic-data-grant','publication-reference','document-id','kind']))
+    res['kind'] = text_leaves(xpath(patent ,['us-bibliographic-data-grant','publication-reference','document-id','kind'])).lstrip('0')
     res['app_date'] = text_leaves(xpath(patent ,['us-bibliographic-data-grant','application-reference','document-id','date']))
     res['abstract'] = text_leaves(xpath(patent ,['abstract']))
     res['title'] = text_leaves(xpath(patent ,['us-bibliographic-data-grant','invention-title']))
@@ -38,6 +38,8 @@ def xml_25_projection(patent):
     res = {}
     res['uid'] =  text_leaves(xpath(patent ,['SDOBI','B100','B110','DNUM','PDAT'])).lstrip('0')
     res['kind'] =  text_leaves(xpath(patent ,['SDOBI','B100','B130','DNUM','PDAT'])).lstrip('0')
+    if len(res['kind']) == 0:
+        res['kind'] =  text_leaves(xpath(patent ,['SDOBI','B100','B130','PDAT'])).lstrip('0')
     res['grant_date'] = text_leaves(xpath(patent ,['SDOBI','B100','B140','DATE','PDAT']))
     res['app_date'] = text_leaves(xpath(patent ,['SDOBI','B200','B220','DATE','PDAT']))
     res['abstract'] = text_leaves(xpath(patent ,['SDOAB','BTEXT']))
@@ -69,27 +71,29 @@ def sgm_25_projection(patent):
     # From https://www.wipo.int/export/sites/www/standards/en/pdf/03-32-01.pdf
     res = {}
     res['uid'] =  text_leaves(xpath(patent ,['SDOBI'.lower(),'B100'.lower(),'B110'.lower(),'DNUM'.lower(),'PDAT'.lower()])).lstrip('0')
-    res['kind'] =  text_leaves(xpath(patent ,['SDOBI'.lower(),'B100'.lower(),'B130'.lower(),'DNUM'.lower(),'PDAT'.lower()]))
+    res['kind'] =  text_leaves(xpath(patent ,['SDOBI'.lower(),'B100'.lower(),'B130'.lower(),'DNUM'.lower(),'PDAT'.lower()])).lstrip('0')
+    if len(res['kind']) == 0:
+        res['kind'] =  text_leaves(xpath(patent ,['SDOBI'.lower(),'B100'.lower(),'B130'.lower(),'PDAT'.lower()])).lstrip('0')
     res['grant_date'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B100'.lower(),'B140'.lower(),'DATE'.lower(),'PDAT'.lower()]))
-    res['app_date'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B200','B220'.lower(),'DATE'.lower(),'PDAT'.lower()]))
+    res['app_date'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B200'.lower(),'B220'.lower(),'DATE'.lower(),'PDAT'.lower()]))
     res['abstract'] = text_leaves(xpath(patent ,['SDOAB'.lower(),'BTEXT'.lower()]))
     res['title'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B500'.lower(),'B540'.lower(),'STEXT'.lower(),'PDAT'.lower()]))
     res['language_title'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B500'.lower(),'B540'.lower(),'B541'.lower(),'STEXT'.lower(),'PDAT'.lower()]))
-    res['IPC_main_class'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI','B500','B510','B511','PDAT']]))
-    res['IPC_further_classes'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI','B500','B510','B512','PDAT']])]
+    res['IPC_main_class'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B510'.lower(),'B511'.lower(),'PDAT'.lower()]]))
+    res['IPC_further_classes'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B510'.lower(),'B512'.lower(),'PDAT'.lower()]])]
     if len(res['IPC_further_classes']) == 0:
-        res['IPC_further_classes'] = [text_leaves(xpath(patent,[s.lower() for s in ['SDOBI','B500','B510','B512','PDAT']]))]
+        res['IPC_further_classes'] = [text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B510'.lower(),'B512'.lower(),'PDAT'.lower()]]))]
         if len(res['IPC_further_classes'][0]) == 0:
             res['IPC_further_classes'] = []
-    res['IPC_edition'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI','B500','B510','B516','PDAT']]))
-    res['US_main_class'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI','B500','B520','B521','PDAT']]))
-    res['US_further_classes'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI','B500','B520','B522','PDAT']])]
+    res['IPC_edition'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B510'.lower(),'B516'.lower(),'PDAT'.lower()]]))
+    res['US_main_class'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B520'.lower(),'B521'.lower(),'PDAT'.lower()]]))
+    res['US_further_classes'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B520'.lower(),'B522'.lower(),'PDAT'.lower()]])]
     if len(res['US_further_classes']) == 0:
-        res['US_further_classes'] = [text_leaves(xpath(patent,[s.lower() for s in ['SDOBI','B500','B520','B522','PDAT']]))]
+        res['US_further_classes'] = [text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B520'.lower(),'B522'.lower(),'PDAT'.lower()]]))]
         if len(res['US_further_classes'][0]) == 0:
             res['US_further_classes'] = []
-    res['US_edition'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI','B500','B520','B526','PDAT']]))
-    res['keywords'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI','B500','B550','B552','PDAT']])]
+    res['US_edition'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B520'.lower(),'B526'.lower(),'PDAT'.lower()]]))
+    res['keywords'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B550'.lower(),'B552'.lower(),'PDAT'.lower()]])]
     res['citations'] = [text_leaves(e) for e in multiple_xpath(patent,['SDOBI'.lower(),'B500'.lower(),'B560'.lower(),'B561'.lower(),'PCIT'.lower(),'DOC'.lower(), 'DNUM'.lower(), 'PDAT'.lower()])]
     if len(res['citations']) == 0:
         res['citations'] = [text_leaves(xpath(patent,['SDOBI'.lower(),'B500'.lower(),'B560'.lower(),'B561'.lower(),'PCIT'.lower(),'DOC'.lower(), 'DNUM'.lower(), 'PDAT'.lower()]))]

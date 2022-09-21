@@ -14,7 +14,7 @@ def parse_file(f,file_object=None,year=None) :
     if f.endswith('.dat') or f.endswith('.DAT') or f.endswith('.txt') or f.endswith('.TXT'):
         proj_data = [dat_projection(parse_sub_fields(r)) for r in read_dat_as_raw(f,file_object=file_object,year=year)]
     elif f.endswith('.xml') or f.endswith('.XML') : 
-        if f.startswith('pftaps'):
+        if f.startswith('pftaps') or f.startswith('pg'):
             proj_data = [xml_25_projection(r) for r in parse_xml_file_raw(f,file_object=file_object,year=year)]
         elif f.startswith('ipg'):
             proj_data = [xml_45_projection(r) for r in parse_xml_file_raw(f,file_object=file_object,year=year)]
@@ -51,8 +51,8 @@ def parse_xml_file_raw(f,file_object=None,year=None) :
             tree = ElementTree.fromstring(doc)
             parsed_docs.append(tree)
         except :
-            os.makedirs('errors', exist_ok = True)
-            log = open('errors/'+str(f)+'.log','a')
+            os.makedirs('errors_parsing', exist_ok = True)
+            log = open('errors_parsing/'+str(f)+'.log','a')
             log.write(doc)
     print('parsed_docs : '+str(len(parsed_docs)))
     return parsed_docs
@@ -79,12 +79,24 @@ def parse_sgm_file_raw(f,file_object=None,year=None) :
     parsed_docs = []
     for doc in tqdm(docs) :
         try :
-            better_doc = BeautifulSoup(doc)
-            tree = ElementTree.fromstring(str(better_doc)[12:-15])
+            better_doc = BeautifulSoup(doc, 'html.parser') # BEFORE: BeautifulSoup(doc) # Now I am specifying what parser to use to have the same results
+            tree = ElementTree.fromstring(str(better_doc)) # BEFORE: ElementTree.fromstring(str(better_doc)[12:-15])
             parsed_docs.append(tree)
-        except :
-            log = open('errors/'+str(f)+'.log','a')
-            log.write(doc)
+        except Exception as e1:
+            try :
+                print(f'ERROR1: {e1}', flush=True)
+                print('Trying to see patent with higher recursion depth', flush=True)
+                with recursion_depth(10000):
+                    better_doc = BeautifulSoup(doc, 'html.parser') # BEFORE: BeautifulSoup(doc) # Now I am specifying what parser to use to have the same results
+                    tree = ElementTree.fromstring(str(better_doc)) # BEFORE: ElementTree.fromstring(str(better_doc)[12:-15])
+                    parsed_docs.append(tree)
+                print('Problem SOLVED', flush=True)
+            except Exception as e2:
+                print(f'ERROR1: {e2}', flush=True)
+                print("Did not work, saving error", flush=True)
+                os.makedirs('errors_parsing', exist_ok = True)
+                log = open('errors_parsing/'+str(f)+'.log','a')
+                log.write(doc)
     print('parsed_docs : '+str(len(parsed_docs)))
     return parsed_docs
 
@@ -102,6 +114,9 @@ def read_dat_as_raw(f,file_object=None,year=None) :
         currentLine=get_current_line(r, replace=False).replace('\n','').replace('\r','').rstrip(' ') # This should be PATN
         if not currentLine.startswith('PATN'):
             print('THERE IS A MISTAKE AT LINE 2 OF THE FILE')
+            os.makedirs('errors_parsing', exist_ok = True)
+            log = open('errors_parsing/'+str(f)+'.log','a')
+            log.write('THERE IS A MISTAKE AT LINE 2 OF THE FILE')
         else:
             currentLine=get_current_line(r, replace=False).replace('\n','').replace('\r','').rstrip(' ') # Start the patent info
     currentPatent = []

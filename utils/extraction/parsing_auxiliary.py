@@ -1,10 +1,10 @@
 from functools import reduce
-
+import sys
 
 ########################### PARSING AUXILIARY FUNCTIONS ###########################
 
 def remove_style_formatting(string):
-    for formatting in ['b', 'i', 'o', 'u', 'em', 'sb', 'sp', 'B', 'I', 'O', 'U', 'EM', 'SB', 'SP']:
+    for formatting in ['b', 'i', 'o', 'u', 'em', 'sb', 'sp', 'B', 'I', 'O', 'U', 'EM', 'SB', 'SP', 'u style="single"', 'o ostyle="single"', 'u style="double"', 'o ostyle="double"']:
         string = string.replace(f'<{formatting}>', '')
         string = string.replace(f'</{formatting}>', '')
     return string
@@ -90,3 +90,20 @@ def append_dico(dico,key,value):
     else :
         dico[key] = value
     return(dico)
+
+
+class recursion_depth:
+    """
+    To change the recursion depth only temporarily. Default depth is 1000.
+    
+    Usage: 
+    with recursion_depth(2000):
+        do_stuff_recursively()
+    """
+    def __init__(self, limit):
+        self.limit = limit
+        self.default_limit = sys.getrecursionlimit()
+    def __enter__(self):
+        sys.setrecursionlimit(self.limit)
+    def __exit__(self, type, value, traceback):
+        sys.setrecursionlimit(self.default_limit)

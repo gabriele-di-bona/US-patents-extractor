@@ -17,6 +17,36 @@ sys.path.insert(0, os.path.join(os.getcwd(),'utils', 'extraction'))
 from parsing import *
 
 
+# def import_file(file_path = None, file_object = None, use_default_folder = True, use_as_name_archive = True, year = None, bulk_data_folder='./bulk_data/'):
+#     if file_path is None:
+#         print('No file_path provided, try again.')
+#         return None
+#     if file_object is None:
+#         if use_as_name_archive == False:
+#             name_archive = file_path.split('/')[-1]
+#         else:
+#             name_archive = file_path
+#         if '.' in file_path:
+#             name_archive = name_archive.split('.')[-2]
+#         if use_as_name_archive == True:
+#             file_path = os.path.join(bulk_data_folder,f'{name_archive}.zip')
+#         archive = zipfile.ZipFile(file_path, 'r')
+#         for filename in archive.namelist():
+#             file_object = archive.open(f'{filename}', mode='r')
+#     else:
+#         if use_as_name_archive == False:
+#             name_archive = file_path.split('/')[-1]
+#         else:
+#             name_archive = file_path
+#         if '.' in file_path:
+#             name_archive = name_archive.split('.')[-2]
+#     print('importing file '+str(name_archive))
+
+#     data = parse_file(f=file_path,file_object=file_object, year=year)
+
+#     return data
+
+
 def import_file(file_path = None, file_object = None, use_default_folder = True, use_as_name_archive = True, year = None, bulk_data_folder='./bulk_data/'):
     if file_path is None:
         print('No file_path provided, try again.')
@@ -28,6 +58,7 @@ def import_file(file_path = None, file_object = None, use_default_folder = True,
             name_archive = file_path
         if '.' in file_path:
             name_archive = name_archive.split('.')[-2]
+            file_path = file_path.split('/')[-1]
         if use_as_name_archive == True:
             file_path = os.path.join(bulk_data_folder,f'{name_archive}.zip')
         archive = zipfile.ZipFile(file_path, 'r')
@@ -38,14 +69,14 @@ def import_file(file_path = None, file_object = None, use_default_folder = True,
             name_archive = file_path.split('/')[-1]
         else:
             name_archive = file_path
-        if '.' in file_path:
-            name_archive = name_archive.split('.')[-2]
-    print('importing file '+str(name_archive))
+        if '/' in file_path:
+            file_path = file_path.split('/')[-1]
+    print('importing archive '+str(name_archive))
+    print('with file_path ' + str(file_path))
 
     data = parse_file(f=file_path,file_object=file_object, year=year)
 
     return data
-
 
 ########################### MAIN ###########################
 
@@ -70,7 +101,7 @@ index_archive = arguments.index_archive
 
 # Define all folder paths
 root_folder = './'
-bulk_data_folder = os.path.join(root_folder, 'bulk_data/')
+bulk_data_folder = os.path.join(root_folder, 'bulk_data3/')
 extracted_data_folder = os.path.join(root_folder, 'extracted_data/')
 os.makedirs(extracted_data_folder, exist_ok = True)
 
@@ -86,22 +117,25 @@ try:
     if len(archive.namelist()) > 1:
         print('There are more than 1 element inside the archive, which one should I choose? Here they are.', flush=True)
         print(archive.namelist(), flush=True)
-        with open(os.path.join(extracted_data_folder, f'ERROR_{name_archive}_more_than_1_element.txt'), 'w') as fp:
-            fp.writelines(archive.namelist())
-        print(f'Exiting at {datetime.now()}...', flush=True)
-        exit()
-
+        # with open(os.path.join(extracted_data_folder, f'ERROR_{name_archive}_more_than_1_element.txt'), 'w') as fp:
+        #     fp.writelines(archive.namelist())
+        # print(f'Exiting at {datetime.now()}...', flush=True)
+        # exit()
     for unzipped_file_path in archive.namelist():
-        print('Opening',unzipped_file_path)
-        file_name = unzipped_file_path.split('/')[-1]
-        file_object = archive.open(f'{unzipped_file_path}', mode='r')
-        patents = import_file(
-            file_path=unzipped_file_path,
-            file_object=file_object, 
-            year=None,
-            use_as_name_archive = False,
-            bulk_data_folder = bulk_data_folder
-        )
+        if '.xml' in unzipped_file_path or '.XML' in unzipped_file_path:
+            # If available choose the xml, otherwise choose the last one (in almost all cases there is only one element)
+            break
+    # for unzipped_file_path in archive.namelist():
+    print('Opening',unzipped_file_path)
+    file_name = unzipped_file_path.split('/')[-1]
+    file_object = archive.open(f'{unzipped_file_path}', mode='r')
+    patents = import_file(
+        file_path=unzipped_file_path,
+        file_object=file_object, 
+        year=None,
+        use_as_name_archive = False,
+        bulk_data_folder = bulk_data_folder
+    )
 
     print(f"FOUND {len(patents)} PATENTS.", flush=True)
 
