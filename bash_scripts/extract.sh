@@ -1,6 +1,6 @@
 #!/bin/bash
 #$ -cwd
-#$ -t 1-100
+#$ -t 1-2491
 #$ -j y
 #$ -pe smp 1
 #$ -l h_vmem=10G
