@@ -78,7 +78,7 @@ def split_field(row) :
     if len(s)>1 :
         return([s[0],s[1].lstrip()])
     else :
-        return(s[0],{}) # returning empty string here causes exception when ABST is empty : should return {} ?
+        return(s[0],{})
 
 
 def append_dico(dico,key,value):

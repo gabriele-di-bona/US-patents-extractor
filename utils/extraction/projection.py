@@ -177,7 +177,7 @@ def dat_projection(patent):
             for kk in patent[k]:
                 for kkk in kk:
                     if kkk=='PNO' : # patent number
-                        list_references.append(kk[kkk])#[:8])
+                        list_references.append(kk[kkk])
             res['citations']=list_references
 
     # Check that all are at least initialized
