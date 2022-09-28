@@ -25,6 +25,20 @@ def xml_45_projection(patent):
         if len(res['IPC_further_classes'][0]) == 0:
             res['IPC_further_classes'] = []
     res['IPC_edition'] = text_leaves(xpath(patent,['us-bibliographic-data-grant','classification-ipc','edition']))
+    if len(res['IPC_main_class'].lstrip(' ')) == 0:
+        # they have changed the structure of this
+        res['IPC_further_classes'] = []
+        sections = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-ipcr','classification-ipcr', 'section'])]
+        classes = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-ipcr','classification-ipcr', 'class'])]
+        subclasses = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-ipcr','classification-ipcr', 'subclass'])]
+        maingroups = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-ipcr','classification-ipcr', 'main-group'])]
+        subgroups = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-ipcr','classification-ipcr', 'subgroup'])]
+        for i in range(len(sections)):
+            if i == 0:
+                res['IPC_main_class'] = f"{sections[0]}{classes[0]}{subclasses[0]} {maingroups[0]}/{subgroups[0]}"
+            else:
+                res['IPC_further_classes'].append(f"{sections[i]}{classes[i]}{subclasses[i]} {maingroups[i]}/{subgroups[i]}")
+        res['IPC_edition'] = text_leaves(xpath(patent,['us-bibliographic-data-grant','classifications-ipcr','classification-ipcr','ipc-version-indicator','date']))
     res['US_main_class'] = text_leaves(xpath(patent,['us-bibliographic-data-grant','classification-national','main-classification']))
     res['US_further_classes'] = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classification-national','further-classification'])]
     if len(res['US_further_classes']) == 0:
@@ -32,6 +46,83 @@ def xml_45_projection(patent):
         if len(res['US_further_classes'][0]) == 0:
             res['US_further_classes'] = []
     res['US_edition'] = text_leaves(xpath(patent,['us-bibliographic-data-grant','classification-national','edition']))
+    if len(res['US_main_class'].lstrip(' ')) == 0:
+        # they have changed the structure of this
+        section = text_leaves(xpath(patent,['us-bibliographic-data-grant','classifications-cpc','main-cpc','classification-cpc', 'section']))
+        classe = text_leaves(xpath(patent,['us-bibliographic-data-grant','classifications-cpc','main-cpc','classification-cpc', 'class']))
+        subclasse = text_leaves(xpath(patent,['us-bibliographic-data-grant','classifications-cpc','main-cpc','classification-cpc', 'subclass']))
+        maingroup = text_leaves(xpath(patent,['us-bibliographic-data-grant','classifications-cpc','main-cpc','classification-cpc', 'main-group']))
+        subgroup = text_leaves(xpath(patent,['us-bibliographic-data-grant','classifications-cpc','main-cpc','classification-cpc', 'subgroup']))
+        res['US_main_class'] = f"{section}{classe}{subclasse} {maingroup}/{subgroup}"
+        res['US_further_classes'] = []
+        sections = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-cpc','further-cpc','classification-cpc', 'section'])]
+        classes = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-cpc','further-cpc','classification-cpc', 'class'])]
+        subclasses = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-cpc','further-cpc','classification-cpc', 'subclass'])]
+        maingroups = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-cpc','further-cpc','classification-cpc', 'main-group'])]
+        subgroups = [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','classifications-cpc','further-cpc','classification-cpc', 'subgroup'])]
+        for i in range(len(sections)):
+            res['US_further_classes'].append(f"{sections[i]}{classes[i]}{subclasses[i]} {maingroups[i]}/{subgroups[i]}")
+        res['US_edition'] = text_leaves(xpath(patent,['us-bibliographic-data-grant','classifications-cpc','main-cpc','classification-cpc','cpc-version-indicator','date']))
+    
+    # get inventors
+    # last_names = []
+    # first_names = []
+    # if xpath(patent,['us-bibliographic-data-grant','parties','inventors']) is not None:
+    #     last_names += [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','parties','inventors', 'inventor', 'addressbook', 'last-name'])]
+    #     first_names += [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','parties','inventors', 'inventor', 'addressbook', 'first-name'])]
+    # if xpath(patent,['us-bibliographic-data-grant','parties','applicants']) is not None:
+    #     for e in multiple_xpath(patent,['us-bibliographic-data-grant','parties','applicants', 'applicant']):
+    #         if 'inventor' in e.attrib['app-type']:
+    #             last_names.append(text_leaves(xpath(e,['addressbook', 'last-name'])))
+    #             first_names.append(text_leaves(xpath(e,['addressbook', 'first-name'])))
+    # if xpath(patent,['us-bibliographic-data-grant','us-parties','inventors']) is not None:
+    #     last_names += [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','us-parties','inventors', 'inventor', 'addressbook', 'last-name'])]
+    #     first_names += [text_leaves(e) for e in multiple_xpath(patent,['us-bibliographic-data-grant','us-parties','inventors', 'inventor', 'addressbook', 'first-name'])]
+    # if xpath(patent,['us-bibliographic-data-grant','us-parties','applicants']) is not None:
+    #     for e in multiple_xpath(patent,['us-bibliographic-data-grant','us-parties','applicants', 'applicant']):
+    #         if 'inventor' in e.attrib['app-type']:
+    #             last_names.append(text_leaves(xpath(e,['addressbook', 'last-name'])))
+    #             first_names.append(text_leaves(xpath(e,['addressbook', 'first-name'])))
+    # if xpath(patent,['us-bibliographic-data-grant','us-parties','us-applicants']) is not None:
+    #     for e in multiple_xpath(patent,['us-bibliographic-data-grant','us-parties','us-applicants', 'applicant']):
+    #         if 'inventor' in e.attrib['app-type']:
+    #             last_names.append(text_leaves(xpath(e,['addressbook', 'last-name'])))
+    #             first_names.append(text_leaves(xpath(e,['addressbook', 'first-name'])))
+    # res['inventors'] = [f"{last_names[i]}; {first_names[i]}" for i in range(len(last_names))]
+    
+    res['inventors'] = []
+    possible_tres_inventors = [
+        ['us-bibliographic-data-grant','parties','inventors', 'inventor'],
+        ['us-bibliographic-data-grant','us-parties','inventors', 'inventor'],
+        ['us-bibliographic-data-grant','us-parties','us-inventors', 'inventor'],
+    ]
+    possible_tres_applicants = [
+        ['us-bibliographic-data-grant','parties','applicants', 'applicant'],
+        ['us-bibliographic-data-grant','us-parties','applicants', 'applicant'],
+        ['us-bibliographic-data-grant','us-parties','us-applicants', 'applicant'],
+    ]
+    for tree in possible_tres_inventors:
+        for e in multiple_xpath(patent,tree):
+            if xpath(e, ['addressbook','orgname']) is not None:
+                res['inventors'].append(text_leaves(xpath(e, ['addressbook','orgname'])))
+            else:
+                last_name = text_leaves(xpath(e,['addressbook', 'last-name'])).lstrip(' ')
+                first_name = text_leaves(xpath(e,['addressbook', 'first-name'])).lstrip(' ')
+                res['inventors'].append(f"{last_name}; {first_name}")
+    for tree in possible_tres_applicants:
+        for e in multiple_xpath(patent,tree):
+            if 'inventor' in e.attrib['app-type']:
+                if xpath(e, ['addressbook','orgname']) is not None:
+                    res['inventors'].append(text_leaves(xpath(e, ['addressbook','orgname'])))
+                else:
+                    last_name = text_leaves(xpath(e,['addressbook', 'last-name'])).lstrip(' ')
+                    first_name = text_leaves(xpath(e,['addressbook', 'first-name'])).lstrip(' ')
+                    res['inventors'].append(f"{last_name}; {first_name}")
+    
+    if res['uid'] == '':
+        res['uid'] =  text_leaves(xpath(patent ,['publication-reference','document-id','doc-number'])).lstrip('0')
+        res['grant_date'] = text_leaves(xpath(patent ,['publication-reference','document-id','date']))
+        res['kind'] = text_leaves(xpath(patent ,['publication-reference','document-id','kind'])).lstrip('0')
     return res
 
 def xml_25_projection(patent):
@@ -58,12 +149,20 @@ def xml_25_projection(patent):
         if len(res['US_further_classes'][0]) == 0:
             res['US_further_classes'] = []
     res['US_edition'] = text_leaves(xpath(patent,['SDOBI','B500','B520','B526','PDAT']))
-    res['keywords'] = [text_leaves(e) for e in multiple_xpath(patent,['SDOBI','B500','B550','B552','PDAT'])]
+    # res['keywords'] = [text_leaves(e) for e in multiple_xpath(patent,['SDOBI','B500','B550','B552','PDAT'])]
     res['citations'] = [text_leaves(e) for e in multiple_xpath(patent,['SDOBI','B500','B560','B561','PCIT','DOC', 'DNUM', 'PDAT'])]
     if len(res['citations']) == 0:
         res['citations'] = [text_leaves(xpath(patent,['SDOBI','B500','B560','B561','PCIT','DOC', 'DNUM', 'PDAT']))]
         if len(res['citations'][0]) == 0:
             res['citations'] = []
+    res['inventors'] = []
+    for e in multiple_xpath(patent,['SDOBI','B700','B720','B721', 'PARTY-US', 'NAM']):
+        last_name = text_leaves(xpath(e,['SNM'])).lstrip(' ')
+        if xpath(e,['FNM']) is not None:
+            first_name = text_leaves(xpath(e,['FNM'])).lstrip(' ')
+            res['inventors'].append(f"{last_name}; {first_name}")
+        else:
+            res['inventors'].append(f"{last_name}")
     return res
 
 # lxml object to data dico for one record
@@ -78,7 +177,7 @@ def sgm_25_projection(patent):
     res['app_date'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B200'.lower(),'B220'.lower(),'DATE'.lower(),'PDAT'.lower()]))
     res['abstract'] = text_leaves(xpath(patent ,['SDOAB'.lower(),'BTEXT'.lower()]))
     res['title'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B500'.lower(),'B540'.lower(),'STEXT'.lower(),'PDAT'.lower()]))
-    res['language_title'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B500'.lower(),'B540'.lower(),'B541'.lower(),'STEXT'.lower(),'PDAT'.lower()]))
+    # res['language_title'] = text_leaves(xpath(patent ,['SDOBI'.lower(),'B500'.lower(),'B540'.lower(),'B541'.lower(),'STEXT'.lower(),'PDAT'.lower()]))
     res['IPC_main_class'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B510'.lower(),'B511'.lower(),'PDAT'.lower()]]))
     res['IPC_further_classes'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B510'.lower(),'B512'.lower(),'PDAT'.lower()]])]
     if len(res['IPC_further_classes']) == 0:
@@ -93,12 +192,20 @@ def sgm_25_projection(patent):
         if len(res['US_further_classes'][0]) == 0:
             res['US_further_classes'] = []
     res['US_edition'] = text_leaves(xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B520'.lower(),'B526'.lower(),'PDAT'.lower()]]))
-    res['keywords'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B550'.lower(),'B552'.lower(),'PDAT'.lower()]])]
+    # res['keywords'] = [text_leaves(e) for e in multiple_xpath(patent,[s.lower() for s in ['SDOBI'.lower(),'B500'.lower(),'B550'.lower(),'B552'.lower(),'PDAT'.lower()]])]
     res['citations'] = [text_leaves(e) for e in multiple_xpath(patent,['SDOBI'.lower(),'B500'.lower(),'B560'.lower(),'B561'.lower(),'PCIT'.lower(),'DOC'.lower(), 'DNUM'.lower(), 'PDAT'.lower()])]
     if len(res['citations']) == 0:
         res['citations'] = [text_leaves(xpath(patent,['SDOBI'.lower(),'B500'.lower(),'B560'.lower(),'B561'.lower(),'PCIT'.lower(),'DOC'.lower(), 'DNUM'.lower(), 'PDAT'.lower()]))]
         if len(res['citations'][0]) == 0:
             res['citations'] = []
+    res['inventors'] = []
+    for e in multiple_xpath(patent,['SDOBI'.lower(),'B700'.lower(),'B720'.lower(),'B721'.lower(), 'PARTY-US'.lower(), 'NAM'.lower()]):
+        last_name = text_leaves(xpath(e,['SNM'.lower()])).lstrip(' ')
+        if xpath(e,['FNM'.lower()]) is not None:
+            first_name = text_leaves(xpath(e,['FNM'.lower()])).lstrip(' ')
+            res['inventors'].append(f"{last_name}; {first_name}")
+        else:
+            res['inventors'].append(f"{last_name}")
     return res
 
 
@@ -141,8 +248,9 @@ def dat_projection(patent):
                 else :
                     text = text+' '+reduce_field(abstract[kk])
             res['abstract']=text.lstrip()
-            if len(additional) > 0:
-                res['additional_abstract']=additional
+            # This is just equations or formulas that can be disregarded
+            # if len(additional) > 0:
+            #     res['additional_abstract']=additional
         elif k=='CLAS' : # classes
             classes = patent[k]
             for kk in classes:
@@ -177,16 +285,19 @@ def dat_projection(patent):
             for kk in patent[k]:
                 for kkk in kk:
                     if kkk=='PNO' : # patent number
-                        list_references.append(kk[kkk])
+                        if type(kk[kkk]) == list:
+                            list_references += kk[kkk]
+                        else:
+                            list_references.append(kk[kkk])
             res['citations']=list_references
 
     # Check that all are at least initialized
-    for key in ['uid', 'kind', 'grant_date', 'app_date', 'abstract', 'title', 'language_title', 'IPC_main_class', 'IPC_edition', 'US_main_class', 'US_edition']:
+    for key in ['uid', 'kind', 'grant_date', 'app_date', 'abstract', 'title', 'IPC_main_class', 'IPC_edition', 'US_main_class', 'US_edition']: # 'language_title', 
         if key not in res:
             res[key] = ''
     if 'US_edition' not in res:
             res['US_edition'] = '1' # if it is not shown, it is the first for these set of patents
-    for key in ['IPC_further_classes', 'US_further_classes', 'keywords', 'citations', 'inventors']:
+    for key in ['IPC_further_classes', 'US_further_classes', 'citations', 'inventors']: # 'keywords', 
         if key not in res:
             res[key] = []
     

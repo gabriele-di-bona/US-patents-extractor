@@ -20,12 +20,23 @@ def parse_file(f,file_object=None,year=None) :
             proj_data = [xml_45_projection(r) for r in parse_xml_file_raw(f,file_object=file_object,year=year)]
     elif f.endswith('.sgm') or f.endswith('.SGML') or f.endswith('.SGM')  : 
         proj_data = [sgm_25_projection(r) for r in parse_sgm_file_raw(f,file_object=file_object,year=year)]
-    for r in proj_data :
+    
+    good_proj_data = []
+    
+    for i,r in enumerate(proj_data) :
         if year is None and 'grant_date' in r and len(r['grant_date']) >= 4:
             r['year']=int(r['grant_date'][:4])
         else:
             r['year']=year
-    return proj_data
+        if r['title'] == '':# or (i > 0 and proj_data[i-1]['uid'] == r['uid']):
+            # There are some unrecognized empty patents that are actually appendices to other patents (e.g. containing the DNA sequence)
+            # Checking if this is true in all of these, and these are skipped
+            # it is just an appendix
+            pass
+        else:
+            # could not solve the issue
+            good_proj_data.append(r)
+    return good_proj_data
 
 def parse_xml_file_raw(f,file_object=None,year=None) :
     # read the file
