@@ -11,3 +11,4 @@ extracted_data/
 *.zip
 errors_parsing/
 *.gz
+*_old/
