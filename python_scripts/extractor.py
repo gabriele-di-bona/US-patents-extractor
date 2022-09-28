@@ -71,7 +71,7 @@ index_archive = arguments.index_archive
 
 # Define all folder paths
 root_folder = './'
-bulk_data_folder = os.path.join(root_folder, 'bulk_data3/')
+bulk_data_folder = os.path.join(root_folder, 'bulk_data/')
 extracted_data_folder = os.path.join(root_folder, 'extracted_data/')
 os.makedirs(extracted_data_folder, exist_ok = True)
 
