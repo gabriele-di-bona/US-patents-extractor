@@ -38,5 +38,5 @@ Once all data has been downloaded and extracted, now we need to solve all issues
 
 Here, we want to consider only the utility patents, i.e., of kind A before 2001, and B1 and B2 after 2001 (they're just a continuation of A). The only difference between B1 and B2 is that in B1 there has not been any applications published before this patent has been granted.
 
-In order to filter all data, one needs to run the whole jupyter notebook `~/notebooks/check_extraction.ipynb`. 
+In order to filter all data, one needs to run the whole jupyter notebook `~/notebooks/filter_extracted_data.ipynb`. 
 If the process is successful, you should find two files in your repository, named `~/filtered_data/utility_df.pkl.gz`, a pd.DataFrame containing only utility patents and all their informations (notice the last columns, that have processed the data and are in the correct format, e.g., `correct_uid` vs `uid`), and `~/filtered_data/mapping_old_to_correct_uid.pkl.gz`, a dict linking `uid` to `correct_uid`. 
