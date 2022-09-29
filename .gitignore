@@ -12,3 +12,4 @@ extracted_data/
 errors_parsing/
 *.gz
 *_old/
+*_old.*
