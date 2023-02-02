@@ -1,12 +1,16 @@
 # US-patents-extractor
+With this repository, you can download the corpus of all USPTO patents, and parse the information.
+
 Using https://github.com/USPTO/PatentPublicData to download corpus, and https://github.com/JusteRaimbault/PatentsMining to parse.
+
+In this repository, we suppose that the root folder `~/` is this main repository directory. 
 
 ## Download Corpus
 ### Setup
 Run the following commands from the terminal to clone the USPTO public repository to download the corpus.
 ```
 git clone https://github.com/USPTO/PatentPublicData
-cd PatentPublicData
+cd ~/PatentPublicData
 git reset --hard 82d6220d054246265fb14892f45320600288949a
 ```
 Last command is to reset the folder to the same commit used in this repository. You might not need this hard reset.
@@ -32,11 +36,7 @@ In order to see how many archives there are, either check the output of the extr
 ls | wc -l
 ```
 
-## Filter data
+## Filter data and more analysis
 
 Once all data has been downloaded and extracted, now we need to solve all issues in the dataset, better define uid, citations, kind, and classification. 
-
-Here, we want to consider only the utility patents, i.e., of kind A before 2001, and B1 and B2 after 2001 (they're just a continuation of A). The only difference between B1 and B2 is that in B1 there has not been any applications published before this patent has been granted.
-
-In order to filter all data, one needs to run the whole jupyter notebook `~/notebooks/filter_extracted_data.ipynb`. 
-If the process is successful, you should find two files in your repository, named `~/filtered_data/utility_df.pkl.gz`, a pd.DataFrame containing only utility patents and all their informations (notice the last columns, that have processed the data and are in the correct format, e.g., `correct_uid` vs `uid`), and `~/filtered_data/mapping_old_to_correct_uid.pkl.gz`, a dict linking `uid` to `correct_uid`. 
+This is all done in the other repository `Recombinations-evolution` (check the README therein for more information).

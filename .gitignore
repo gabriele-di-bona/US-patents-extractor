@@ -7,7 +7,7 @@ data/
 maven/
 bulk_data/
 other_bulk_data/
-extracted_data/
+extracted_data*
 *.zip
 errors_parsing/
 *.gz
