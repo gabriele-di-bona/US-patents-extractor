@@ -11,7 +11,6 @@ os.chdir("../")
 import sys
 # Add utils directory in the list of directories to look for packages to import
 sys.path.insert(0, os.path.join(os.getcwd(),'utils'))
-sys.path.insert(0, os.path.join(os.getcwd(),'utils', 'extraction'))
 
 # local utils
 from parsing import *
