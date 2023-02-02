@@ -34,7 +34,10 @@ Notice that this has downloaded also an archive named `ipg200317_r1.zip`, which 
 ## Extract and Parse Corpus
 To process and extract the data, run the script `~/bash_scripts/extract.sh` from the folder `~/bash_scripts/outputs/`. This will process the each archive, one per week, depending on the intex of the job. 
 
-These jobs run python 3.9.5 scripts. The environment requirements used are saved in `~\patents.yml`, which should be used to create a local environment and obtain the same results.
+These jobs run python 3.9.5 scripts. The environment requirements used are saved in `~\patents.yml`, which should be used to create a local environment and obtain the same results with the command:
+```
+conda env create -f patents.yml
+```
 
 The processed data is saved into the folder `~/extracted_data/` as a list of dicts saved as `.pkl.gz` files, one dict for each patent.
 The keys of each patent could be empty strings if not found. if there is any mistake during the process, a respective error `.txt` file is created.
