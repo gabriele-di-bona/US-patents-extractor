@@ -31,7 +31,7 @@ export PATH=$M2:$PATH
 # Therefore, be aware that if we are not in 2023, if you use 20221231 as final date,
 # it will try to scrape 2023, which doesn't exist, therefore giving error.
 # ==> Write 20221230 as final date to scrape until end of 2022.
-DATE="19760102-20221230"
+DATE="19760102-20230202"
 
 DOWNLOAD_ROOT_FOLDER="${PROJECT_ROOT_FOLDER}/bulk_data/"
 mkdir -p $DOWNLOAD_ROOT_FOLDER
