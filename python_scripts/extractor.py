@@ -56,16 +56,22 @@ print(f"Started script at {start_time}", flush = True)
 # Use arguments to give from shell
 shell_parser = argparse.ArgumentParser(description='Extract all patents from the bulk data. This script processes only one archive at a time, whose index is given by shell. The data is saved as a list of dicts, one dict for each patent. The keys of each patent could be empty strings if not found.')
 
-# quiet argument, to supress info
 shell_parser.add_argument(
     "-i", "--index_archive", type=int,
     default=1,
     help="Index of the archive list to choose the archive to be processed. Must be a number greater or equal than 1. [default: 1]"
     )
 
+shell_parser.add_argument(
+    "-skip", "--skip_extracted_files", type=lambda x: (str(x).lower() in ['true','1', 'yes', 'y']),
+    default=True,
+    help="Index of the archive list to choose the archive to be processed. Must be a number greater or equal than 1. [default: True]"
+    )
+
 # Parse shell arguments
 arguments = shell_parser.parse_args()
 index_archive = arguments.index_archive
+skip_extracted_files = arguments.skip_extracted_files
 
 
 # Define all folder paths
@@ -82,35 +88,38 @@ print('Requested path n. %d out of %d, that is\n\t%s'%(index_archive,len(archive
 
 try:
     name_archive = path[:-4] # cutting the '.zip' string
-    archive = zipfile.ZipFile(os.path.join(bulk_data_folder,f'{name_archive}.zip'), 'r')
-    if len(archive.namelist()) > 1:
-        print('There are more than 1 element inside the archive, which one should I choose? Here they are.', flush=True)
-        print(archive.namelist(), flush=True)
-    for unzipped_file_path in archive.namelist():
-        if '.xml' in unzipped_file_path or '.XML' in unzipped_file_path:
-            # If available choose the xml, otherwise choose the last one (in almost all cases there is only one element)
-            break
-    # for unzipped_file_path in archive.namelist():
-    print('Opening',unzipped_file_path)
-    file_name = unzipped_file_path.split('/')[-1]
-    file_object = archive.open(f'{unzipped_file_path}', mode='r')
-    patents = import_file(
-        file_path=unzipped_file_path,
-        file_object=file_object, 
-        year=None,
-        use_as_name_archive = False,
-        bulk_data_folder = bulk_data_folder
-    )
+    if skip_extracted_files == False or ( skip_extracted_files == True and os.path.exists(os.path.join(extracted_data_folder, f'{name_archive}.pkl.gz')) == False):
+        archive = zipfile.ZipFile(os.path.join(bulk_data_folder,f'{name_archive}.zip'), 'r')
+        if len(archive.namelist()) > 1:
+            print('There are more than 1 element inside the archive, which one should I choose? Here they are.', flush=True)
+            print(archive.namelist(), flush=True)
+        for unzipped_file_path in archive.namelist():
+            if '.xml' in unzipped_file_path or '.XML' in unzipped_file_path:
+                # If available choose the xml, otherwise choose the last one (in almost all cases there is only one element)
+                break
+        # for unzipped_file_path in archive.namelist():
+        print('Opening',unzipped_file_path)
+        file_name = unzipped_file_path.split('/')[-1]
+        file_object = archive.open(f'{unzipped_file_path}', mode='r')
+        patents = import_file(
+            file_path=unzipped_file_path,
+            file_object=file_object, 
+            year=None,
+            use_as_name_archive = False,
+            bulk_data_folder = bulk_data_folder
+        )
 
-    print(f"FOUND {len(patents)} PATENTS.", flush=True)
+        print(f"FOUND {len(patents)} PATENTS.", flush=True)
 
-    with gzip.open(os.path.join(extracted_data_folder, f'{name_archive}.pkl.gz'), 'wb') as fp:
-        joblib.dump(patents, fp)
+        with gzip.open(os.path.join(extracted_data_folder, f'{name_archive}.pkl.gz'), 'wb') as fp:
+            joblib.dump(patents, fp)
 
-    print('All dumped', flush=True)
-    print(f'Script time: {datetime.now() - start_time}', flush=True)
-    print(f'Exiting script at {datetime.now()}', flush=True)
-    
+        print('All dumped', flush=True)
+        print(f'Script time: {datetime.now() - start_time}', flush=True)
+        print(f'Exiting script at {datetime.now()}', flush=True)
+    else:
+        print(f"Skipping file because present", flush = True)
+        print('Extracted data in file', os.path.join(extracted_data_folder, f'{name_archive}.pkl.gz'), flush = True)
 except:
     print(f"FOUND ERROR", flush = True)
     with open(os.path.join(extracted_data_folder, f'ERROR_{name_archive}_generic.txt'), 'w') as fp:
